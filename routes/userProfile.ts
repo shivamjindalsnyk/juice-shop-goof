@@ -4,6 +4,7 @@
  */
 
 import fs = require('fs')
+import { rateLimit } from 'express-rate-limit'
 import { type Request, type Response, type NextFunction } from 'express'
 
 import { UserModel } from '../models/user'
@@ -18,6 +19,11 @@ const Entities = require('html-entities').AllHtmlEntities
 const entities = new Entities()
 
 module.exports = function getUserProfile () {
+  const limiter = rateLimit({
+    windowMs: 30 * 60 * 1000, // 30 minutes
+    limit: 5, // Limit each IP to 5 requests per windowMs
+  })
+
   return (req: Request, res: Response, next: NextFunction) => {
     fs.readFile('views/userProfile.pug', function (err, buf) {
       if (err != null) throw err
@@ -62,7 +68,7 @@ module.exports = function getUserProfile () {
             'Content-Security-Policy': CSP
           })
 
-          res.send(fn(user))
+          res.render('userProfile', { user })
         }).catch((error: Error) => {
           next(error)
         })
