@@ -68,7 +68,7 @@ module.exports = function getUserProfile () {
             'Content-Security-Policy': CSP
           })
 
-          res.render('userProfile', { user })
+          res.send(fn(user))
         }).catch((error: Error) => {
           next(error)
         })
